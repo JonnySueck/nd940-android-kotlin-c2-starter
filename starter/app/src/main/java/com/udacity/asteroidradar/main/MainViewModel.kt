@@ -1,34 +1,38 @@
 package com.udacity.asteroidradar.main
 
+import android.app.Application
 import androidx.lifecycle.*
-import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.AsteroidApi
-import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import com.udacity.asteroidradar.database.AsteroidsDatabase
+import com.udacity.asteroidradar.database.DatabaseAsteroid
 import com.udacity.asteroidradar.repository.AsteroidsRepository
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 enum class AsteroidApiStatus { LOADING, ERROR, DONE }
-// private val repository: AsteroidsRepository
 // add to mainViewModel as a dependency
-class MainViewModel() : ViewModel() {
-
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Private value that tells the status of loading the asteroids
     private val _status = MutableLiveData<AsteroidApiStatus>()
 
-    val _asteroids = MutableLiveData<ArrayList<Asteroid>>()
+    private lateinit var asteroids : ArrayList<DatabaseAsteroid>
+//            get() = _asteroids
+
+    private var _asteroids = MutableLiveData<ArrayList<DatabaseAsteroid>>()
 
     // Private value that keeps track of the PictureOfTheDay
     val _asteroidImage = MutableLiveData<PictureOfDay>()
 
-//    private val database: AsteroidsDatabase(application)
-//
-//    val repository: AsteroidsRepository(database)
-
     // Public value that keeps track of the PicureOfTheDay
     val asteroidImage: LiveData<PictureOfDay>
         get() = _asteroidImage
+
+    lateinit var repository: AsteroidsRepository
+
+    init {
+        val asteroidDB = AsteroidsDatabase.getInstance(application).asteroidsDao()
+        repository = AsteroidsRepository(asteroidDB)
+    }
 
     fun getImageOfTheDay() {
         _status.value = AsteroidApiStatus.LOADING
@@ -48,10 +52,7 @@ class MainViewModel() : ViewModel() {
         _status.value = AsteroidApiStatus.LOADING
         viewModelScope.launch {
             try {
-                //                repository.refreshAsteroidsList()
-                val asteroidsList = AsteroidApi.retrofitService.getAsteroids()
-                val parsedAsteroids = parseAsteroidsJsonResult(JSONObject(asteroidsList))
-                _asteroids.value = parsedAsteroids
+                repository.refreshAsteroidsList()
                 _status.value = AsteroidApiStatus.DONE
             } catch (e: Exception) {
                 _status.value = AsteroidApiStatus.ERROR
@@ -60,12 +61,3 @@ class MainViewModel() : ViewModel() {
     }
 
 }
-//class AsteroidViewModelFactory(private val repository: AsteroidsRepository) : ViewModelProvider.Factory {
-//    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//        if (modelClass.isAssignableFrom(AsteroidsRepository::class.java)) {
-//            @Suppress("UNCHECKED_CAST")
-//            return MainViewModel(repository) as T
-//        }
-//        throw IllegalArgumentException("Unknown ViewModel class")
-//    }
-//}

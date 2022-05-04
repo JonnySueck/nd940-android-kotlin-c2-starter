@@ -55,3 +55,10 @@ private fun getNextSevenDaysFormattedDates(): ArrayList<String> {
 
     return formattedDateList
 }
+
+fun getDate(): String{
+    val date = Calendar.getInstance()
+    val time = date.time
+    val format = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
+    return format.format(time)
+}

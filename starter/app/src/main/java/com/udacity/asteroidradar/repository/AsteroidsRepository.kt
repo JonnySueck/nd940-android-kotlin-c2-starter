@@ -3,17 +3,15 @@ package com.udacity.asteroidradar.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.udacity.asteroidradar.Asteroid
-import com.udacity.asteroidradar.database.AsteroidsDatabase
 import com.udacity.asteroidradar.api.AsteroidApi
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidsDatabaseDao
 import com.udacity.asteroidradar.database.DatabaseAsteroid
-import com.udacity.asteroidradar.database.asDatabaseModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class AsteroidsRepository(private val asteroidsDatabaseDao: AsteroidsDatabaseDao) {
+class AsteroidsRepository(private val asteroidDao: AsteroidsDatabaseDao) {
 //    val asteroids: LiveData<List<Asteroid>> = Transformations.map(
 //        asteroidsDatabaseDao.){
 //        it.asDatabaseModel()
@@ -25,9 +23,33 @@ class AsteroidsRepository(private val asteroidsDatabaseDao: AsteroidsDatabaseDao
             var asteroidsList = AsteroidApi.retrofitService.getAsteroids()
             val parsedAsteroids = parseAsteroidsJsonResult(JSONObject(asteroidsList))
             if(!parsedAsteroids.isNullOrEmpty()){
-                asteroidsDatabaseDao.insertAll(parsedAsteroids.asDatabaseModel() as ArrayList<DatabaseAsteroid>)
-//                asteroidsDatabaseDao.insertAll(parsedAsteroids.asDatabaseModel())
+                for(asteroid in parsedAsteroids)
+                    insertAsteroid(asteroid)
             }
         }
     }
+
+    private fun convertAsteroid(it: Asteroid) : DatabaseAsteroid {
+        return DatabaseAsteroid(
+            id = it.id,
+            codename =it.codename,
+            closeApproachDate = it.closeApproachDate,
+            absoluteMagnitude = it.absoluteMagnitude,
+            estimatedDiameter = it.estimatedDiameter,
+            relativeVelocity = it.relativeVelocity,
+            distanceFromEarth = it.distanceFromEarth,
+            isPotentiallyHazardous = it.isPotentiallyHazardous
+        )
+    }
+
+    fun insertAsteroid(asteroid: Asteroid){
+        val asteroidD = convertAsteroid(asteroid)
+        asteroidDao.insert(asteroidD)
+    }
+
+    fun insertAll(asteroids: ArrayList<DatabaseAsteroid>){
+        asteroidDao.insertAll(asteroids)
+    }
+
+//    suspend fun getAllAsteroids(): ArrayList<DatabaseAsteroid> = asteroidDao.getAsteroidsList()
 }
