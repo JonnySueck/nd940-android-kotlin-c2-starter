@@ -65,19 +65,22 @@ class MainFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.show_week_menu -> viewModel.showWeek()
+            R.id.show_today_menu -> viewModel.showTonight()
+            else -> viewModel.showAll()
+        }
         return true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // Call the getImageOfTheDay function defined in the viewModel
         viewModel.getImageOfTheDay()
         // Call the getAsteroidsList function defined in the viewModel
         viewModel.getAsteroidsList()
-
         // set an observer to see if the value of asteroidImage changes
-        viewModel._asteroidImage.observe(viewLifecycleOwner){
+        viewModel._asteroidImage.observe(viewLifecycleOwner) {
             val imgUri = it.url.toUri().buildUpon()?.scheme("https")?.build()
             Glide.with(requireContext())
                 .load(imgUri)
@@ -88,6 +91,5 @@ class MainFragment : Fragment() {
                 )
                 .into(binding.activityMainImageOfTheDay)
         }
-
     }
 }

@@ -1,12 +1,11 @@
 package com.udacity.asteroidradar.main
 
 import android.app.Application
-import android.widget.TextView
 import androidx.lifecycle.*
-import androidx.recyclerview.widget.RecyclerView
-import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.AsteroidApi
+import com.udacity.asteroidradar.api.getDate
+import com.udacity.asteroidradar.api.getNextSevenDaysFormattedDates
 import com.udacity.asteroidradar.database.AsteroidsDatabase
 import com.udacity.asteroidradar.database.DatabaseAsteroid
 import com.udacity.asteroidradar.repository.AsteroidsRepository
@@ -14,12 +13,12 @@ import kotlinx.coroutines.launch
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+    private val asteroidsDatabase = AsteroidsDatabase.getInstance(application)
 
     enum class AsteroidApiStatus { LOADING, ERROR, DONE }
 
     // Private value that tells the status of loading the asteroids
     private val _status = MutableLiveData<AsteroidApiStatus>()
-
     var _asteroids = MutableLiveData<List<DatabaseAsteroid>>()
 
     // Private value that keeps track of the PictureOfTheDay
@@ -41,6 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         val asteroidDB = AsteroidsDatabase.getInstance(application).asteroidsDao
         repository = AsteroidsRepository(asteroidDB)
+        getAsteroidsList()
     }
 
     fun getImageOfTheDay() {
@@ -58,11 +58,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getAsteroidsList() {
-        _status.value = AsteroidApiStatus.LOADING
         viewModelScope.launch {
+            _status.value = AsteroidApiStatus.LOADING
             try {
                 repository.refreshAsteroidsList()
-                _asteroids.value = repository.getAllAsteroids()
+                _asteroids.value = repository.getAsteroidsList()
                 _status.value = AsteroidApiStatus.DONE
             } catch (e: Exception) {
                 _status.value = AsteroidApiStatus.ERROR
@@ -76,5 +76,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun displayAsteroidDetailsComplete() {
         _navigateToSelectedAsteroid.value = null
+    }
+
+    fun showWeek() {
+        viewModelScope.launch {
+            _asteroids.value = asteroidsDatabase.asteroidsDao.getWeek(
+                todaysDate = getDate(),
+                oneWeekAwayDate = getNextSevenDaysFormattedDates().last()
+            )
+        }
+    }
+
+    fun showTonight() {
+        viewModelScope.launch {
+            _asteroids.value = asteroidsDatabase.asteroidsDao.getTonight(todaysDate = getDate())
+        }
+    }
+
+    fun showAll() {
+        viewModelScope.launch {
+            _asteroids.value = asteroidsDatabase.asteroidsDao.getAll(todaysDate = getDate())
+        }
     }
 }

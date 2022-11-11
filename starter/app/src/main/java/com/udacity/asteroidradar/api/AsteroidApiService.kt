@@ -11,7 +11,9 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 private const val base_url = Constants.BASE_URL
-private const val api_key = "AuLTKnSJnJ6atbnq6Yz4bIh4mnDbclmtCJiamhvK"
+
+private const val api_key = "mqYMIHIsBCf29FRVnHMAIuo24zfLTrQvnGwcWWmw"
+
 const val img_url = "https://api.nasa.gov/planetary/apod?api_key=${api_key}"
 
 interface AsteroidApiService {
@@ -23,7 +25,6 @@ interface AsteroidApiService {
     @GET("feed?")
     suspend fun getAsteroids(
         // Queries annotations to pass the dynamic date & API key to retrofit
-        @Query(Constants.START_DATE) todayDate:String = getDate(),
         @Query(Constants.API_KEY) apiKey:String = api_key
     ): String
 }

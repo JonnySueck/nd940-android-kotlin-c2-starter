@@ -2,6 +2,7 @@ package com.udacity.asteroidradar.repository
 
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.api.AsteroidApi
+import com.udacity.asteroidradar.api.getDate
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidsDatabaseDao
 import com.udacity.asteroidradar.database.DatabaseAsteroid
@@ -40,10 +41,6 @@ class AsteroidsRepository(private val asteroidDao: AsteroidsDatabaseDao) {
         asteroidDao.insert(asteroidD)
     }
 
-    fun insertAll(asteroids: ArrayList<DatabaseAsteroid>){
-        asteroidDao.insertAll(asteroids)
-    }
-
-    suspend fun getAllAsteroids(): List<DatabaseAsteroid> = asteroidDao.getAll()
+    suspend fun getAsteroidsList(): List<DatabaseAsteroid> = asteroidDao.getAll(todaysDate = getDate())
 
 }
