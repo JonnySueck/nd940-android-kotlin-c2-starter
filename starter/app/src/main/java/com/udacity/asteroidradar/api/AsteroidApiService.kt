@@ -25,6 +25,8 @@ interface AsteroidApiService {
     @GET("feed?")
     suspend fun getAsteroids(
         // Queries annotations to pass the dynamic date & API key to retrofit
+        @Query(Constants.START_DATE) startDate: String = getDate(),
+        @Query(Constants.END_DATE) endDate: String = getNextSevenDaysFormattedDates().first(),
         @Query(Constants.API_KEY) apiKey:String = api_key
     ): String
 }
