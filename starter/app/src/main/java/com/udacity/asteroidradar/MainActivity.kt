@@ -26,12 +26,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupReoccurringWork() {
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.UNMETERED)
-            .apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    setRequiresDeviceIdle(true)
-                }
-            }.build()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+//            .setRequiresBatteryNotLow(true)
+//            .setRequiresCharging(true)
+//            .apply {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    setRequiresDeviceIdle(true)
+//                }
+//            }
+            .build()
 
         val repeatingRequest = PeriodicWorkRequestBuilder<RefreshDataWorker>(1, TimeUnit.DAYS)
             .setConstraints(constraints)

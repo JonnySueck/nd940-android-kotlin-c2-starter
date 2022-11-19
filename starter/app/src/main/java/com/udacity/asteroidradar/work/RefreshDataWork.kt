@@ -11,6 +11,7 @@ import com.udacity.asteroidradar.repository.AsteroidsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import retrofit2.HttpException
 
 class RefreshDataWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
@@ -19,20 +20,15 @@ class RefreshDataWorker(appContext: Context, params: WorkerParameters) :
         const val WORK_NAME = "RefreshDataWorker"
     }
 
+
     override suspend fun doWork(): Result {
         val database = getInstance(applicationContext)
         val repository = AsteroidsRepository(database.asteroidsDao)
-        withContext(Dispatchers.IO) {
-            var asteroidsList = AsteroidApi.retrofitService.getAsteroids(
-                startDate = getNextSevenDaysFormattedDates().first(),
-                endDate = getNextSevenDaysFormattedDates().last()
-            )
-            val parsedAsteroids = parseAsteroidsJsonResult(JSONObject(asteroidsList))
-            if (!parsedAsteroids.isNullOrEmpty()) {
-                for (asteroid in parsedAsteroids)
-                    repository.insertAsteroid(asteroid)
-            }
+        return try {
+//            repository.refreshAsteroidsList()
+            return Result.success()
+        }catch (e: HttpException) {
+            Result.retry()
         }
-        return Result.success()
     }
 }

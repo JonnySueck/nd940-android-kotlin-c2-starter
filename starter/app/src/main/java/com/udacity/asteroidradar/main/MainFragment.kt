@@ -40,6 +40,7 @@ class MainFragment : Fragment() {
         })
         // passing the adapter variable to the recyclerView
         binding.asteroidRecycler.adapter = adapter
+        viewModel.showAll()
         // Setting an observer on the list of asteroids in the viewModel
         viewModel._asteroids.observe(viewLifecycleOwner, Observer {
             it?.let{

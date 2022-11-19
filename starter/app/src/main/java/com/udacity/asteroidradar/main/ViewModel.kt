@@ -40,7 +40,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         val asteroidDB = AsteroidsDatabase.getInstance(application).asteroidsDao
         repository = AsteroidsRepository(asteroidDB)
-        getAsteroidsList()
     }
 
     fun getImageOfTheDay() {
